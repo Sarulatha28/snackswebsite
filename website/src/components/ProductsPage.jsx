@@ -2,341 +2,626 @@
 
 import { useState } from "react";
 import { PRODUCTS } from "../data";
-
 import {
   Star,
   ShoppingCart,
   X,
   Heart,
+  ArrowRight,
+  ChevronDown,
 } from "lucide-react";
 
 const ProductPage = ({ cartCount, setCartCount }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [wishlist, setWishlist] = useState([]);
 
-  const addToCart = () => {
-    setCartCount((prev) => prev + 1);
-  };
+  const addToCart = () => setCartCount((prev) => prev + 1);
 
-  const openModal = (item) => {
-    setSelectedProduct(item);
-
-    setTimeout(() => {
-      setModalVisible(true);
-    }, 10);
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-
-    setTimeout(() => {
-      setSelectedProduct(null);
-    }, 350);
-  };
+  const toggleWishlist = (id) =>
+    setWishlist((prev) =>
+      prev.includes(id)
+        ? prev.filter((x) => x !== id)
+        : [...prev, id]
+    );
 
   return (
-    <div className="bg-black text-white min-h-screen py-20 overflow-hidden">
-      {/* HEADING */}
+    <div
+      style={{ background: "var(--ink)", color: "var(--cream)" }}
+      className="overflow-hidden min-h-screen"
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
-      <div className="text-center px-6 mb-16 pt-8">
-        <p className="text-yellow-400 uppercase tracking-[5px] text-sm font-semibold mb-3">
-          Explore the Menu
-        </p>
+        :root {
+          --crimson: #c0392b;
+          --gold: #d4a84b;
+          --gold-light: #f0c96b;
+          --cream: #f5f0e8;
+          --ink: #0d0a07;
+          --surface: rgba(245,240,232,0.04);
+          --border: rgba(212,168,75,0.12);
+          --muted: rgba(245,240,232,0.45);
+        }
 
-        <h1 className="text-5xl md:text-6xl font-black">
-          Our <span className="text-yellow-400">Products</span>
-        </h1>
+        * {
+          font-family: 'DM Sans', sans-serif;
+        }
 
-        <p className="text-gray-400 mt-4 text-lg max-w-xl mx-auto">
-          Handpicked premium dishes made fresh daily —
-          order now and taste the difference.
-        </p>
-      </div>
+        .serif {
+          font-family: 'Playfair Display', serif;
+        }
 
-      {/* AUTO SCROLL OFFER */}
+        .ticker-track {
+          display: inline-flex;
+          white-space: nowrap;
+          animation: ticker 28s linear infinite;
+        }
 
-      <div className="overflow-hidden whitespace-nowrap mb-20 py-4 border-y border-yellow-400/20 bg-yellow-400/5">
-        <div
-          className="inline-flex gap-10"
-          style={{
-            animation: "scrollTicker 20s linear infinite",
-          }}
-        >
-          {[...PRODUCTS, ...PRODUCTS].map((item, index) => (
-            <div
-              key={index}
-              className="bg-yellow-400 text-black px-8 py-3 rounded-full font-bold text-base inline-flex items-center gap-2 flex-shrink-0"
-            >
-              🔥 50% OFF {item.title}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* STYLE */}
-
-      <style>
-        {`
-          @keyframes scrollTicker {
-            0% {
-              transform: translateX(0);
-            }
-
-            100% {
-              transform: translateX(-50%);
-            }
+        @keyframes ticker {
+          0% {
+            transform: translateX(0);
           }
-        `}
-      </style>
+          100% {
+            transform: translateX(-50%);
+          }
+        }
 
-      {/* PRODUCTS GRID */}
+        .product-card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 24px;
+          overflow: hidden;
+          cursor: pointer;
+          transition: all 0.5s ease;
+        }
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 px-6 lg:px-20 max-w-7xl mx-auto">
-        {PRODUCTS.map((item) => (
-          <div
-            key={item.id}
-            onClick={() => openModal(item)}
-            className="group relative overflow-hidden rounded-[35px] bg-gradient-to-br from-gray-900 via-black to-gray-950 border border-white/10 hover:border-yellow-400/40 duration-500 cursor-pointer hover:-translate-y-4 max-w-[420px] mx-auto w-full"
+        .product-card:hover {
+          transform: translateY(-10px);
+          border-color: rgba(212,168,75,0.4);
+          box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+        }
+
+        .card-img {
+          height: 260px;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .card-img img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.6s ease;
+        }
+
+        .product-card:hover .card-img img {
+          transform: scale(1.1);
+        }
+
+        .card-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            to top,
+            rgba(13,10,7,0.92) 0%,
+            transparent 55%
+          );
+          opacity: 0;
+          transition: opacity 0.4s;
+        }
+
+        .product-card:hover .card-overlay {
+          opacity: 1;
+        }
+
+        .card-hover-info {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          padding: 16px;
+          transform: translateY(100%);
+          transition: transform 0.4s ease;
+        }
+
+        .product-card:hover .card-hover-info {
+          transform: translateY(0);
+        }
+
+        .add-btn {
+          background: linear-gradient(
+            135deg,
+            var(--gold) 0%,
+            #b8892a 100%
+          );
+
+          color: var(--ink);
+          border: none;
+          padding: 13px;
+          border-radius: 14px;
+          font-weight: 700;
+          width: 100%;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          transition: all 0.3s ease;
+        }
+
+        .add-btn:hover {
+          transform: scale(1.03);
+        }
+
+        .outline-btn {
+          background: transparent;
+          color: var(--cream);
+          border: 1px solid var(--border);
+          padding: 13px;
+          border-radius: 14px;
+          width: 100%;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .outline-btn:hover {
+          border-color: var(--gold);
+          color: var(--gold);
+        }
+
+        .section-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 0.72rem;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: var(--gold);
+          font-weight: 600;
+          margin-bottom: 14px;
+        }
+
+        .section-label::before {
+          content: '';
+          width: 32px;
+          height: 1px;
+          background: var(--gold);
+        }
+
+        .pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 14px;
+          border-radius: 100px;
+          border: 1px solid var(--border);
+          font-size: 0.72rem;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--gold);
+          background: rgba(212,168,75,0.06);
+        }
+
+        .popup-overlay {
+          animation: fadeIn 0.3s ease;
+        }
+
+        .popup-modal {
+          animation: popup 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes popup {
+          from {
+            opacity: 0;
+            transform: scale(0.85);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
+
+      {/* HERO SECTION */}
+
+      <section
+        style={{
+          minHeight: "56vh",
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600&q=80')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(135deg,rgba(13,10,7,0.97),rgba(13,10,7,0.78))",
+          }}
+        />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 w-full pt-28 pb-16">
+          <div className="flex flex-wrap gap-3 mb-10">
+            {[
+              ["⭐", "4.9 Rating"],
+              ["🍽️", "200+ Dishes"],
+              ["🚀", "30 min Delivery"],
+            ].map(([icon, label]) => (
+              <span key={label} className="pill">
+                {icon} {label}
+              </span>
+            ))}
+          </div>
+
+          <h1
+            className="serif"
+            style={{
+              fontSize: "clamp(2.8rem,7vw,5.5rem)",
+              fontWeight: 900,
+              lineHeight: 1.04,
+              marginBottom: 20,
+            }}
           >
-            {/* HOVER LIGHT */}
+            Our <em style={{ color: "var(--gold)" }}>Menu</em>
+            <br />
+            & Products
+          </h1>
 
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 duration-700 bg-gradient-to-t from-yellow-400/10 via-transparent to-transparent z-0"></div>
+          <p
+            style={{
+              color: "var(--muted)",
+              fontSize: "1rem",
+              lineHeight: 1.8,
+              maxWidth: 480,
+              marginBottom: 36,
+            }}
+          >
+            Handpicked premium dishes made fresh daily — order now and taste
+            the difference.
+          </p>
 
-            {/* IMAGE */}
+          {/* NORMAL FONT NUMBERS */}
 
-            <div className="relative overflow-hidden h-[260px]">
-              <img
-                src={item.image}
-                alt={item.title}
-                className="w-full h-full object-cover group-hover:scale-110 duration-700"
-              />
+          <div
+            className="flex flex-wrap gap-8 pt-6"
+            style={{ borderTop: "1px solid var(--border)" }}
+          >
+            {[
+              ["50K+", "Orders"],
+              ["4.9★", "Rating"],
+              ["200+", "Dishes"],
+              ["30 min", "Delivery"],
+            ].map(([n, l]) => (
+              <div key={l}>
+                <div
+                  style={{
+                    fontSize: "1.5rem",
+                    fontWeight: 900,
+                    color: "var(--gold)",
+                  }}
+                >
+                  {n}
+                </div>
 
-              {/* OVERLAY */}
+                <div
+                  style={{
+                    fontSize: "0.72rem",
+                    color: "var(--muted)",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {l}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/70 duration-500"></div>
+      {/* PRODUCTS */}
 
-              {/* HOVER DETAILS */}
+      <section className="py-24 px-6 lg:px-12 max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <p
+            className="section-label"
+            style={{ justifyContent: "center" }}
+          >
+            Popular Dishes
+          </p>
 
-              <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 duration-500 p-5 z-20">
-                <div className="backdrop-blur-xl bg-white/10 border border-white/10 rounded-3xl p-5">
-                  <h3 className="text-2xl font-black text-white">
+          <h2
+            className="serif"
+            style={{
+              fontSize: "clamp(2rem,5vw,3.5rem)",
+              fontWeight: 900,
+              lineHeight: 1.1,
+            }}
+          >
+            Mostly Ordered
+            <br />
+
+            <em style={{ color: "var(--gold)" }}>Favourites</em>
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {(PRODUCTS || []).map((item, i) => (
+            <div
+              key={item.id}
+              className="product-card"
+              onClick={() => setSelectedProduct(item)}
+            >
+              <div className="card-img">
+                <img src={item.image} alt={item.title} />
+
+                <div className="card-overlay" />
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleWishlist(item.id);
+                  }}
+                  style={{
+                    position: "absolute",
+                    top: 14,
+                    right: 14,
+                    width: 38,
+                    height: 38,
+                    borderRadius: "50%",
+                    border: "none",
+                    background: "rgba(0,0,0,0.5)",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  <Heart
+                    size={16}
+                    fill={
+                      wishlist.includes(item.id)
+                        ? "#e74c3c"
+                        : "transparent"
+                    }
+                  />
+                </button>
+              </div>
+
+              <div style={{ padding: 20 }}>
+                <div className="flex items-center justify-between mb-2">
+                  <h3
+                    className="serif"
+                    style={{
+                      fontSize: "1.2rem",
+                      fontWeight: 700,
+                    }}
+                  >
                     {item.title}
                   </h3>
 
-                  <p className="text-gray-300 text-sm mt-3 leading-6">
-                    Fresh ingredients with premium taste and
-                    luxury food experience.
-                  </p>
-
-                  <div className="flex items-center justify-between mt-5">
-                    <h2 className="text-3xl font-black text-yellow-400">
-                      ₹{item.price}
-                    </h2>
-
-                    <div className="flex gap-2 items-center">
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map((s) => (
                       <Star
-                        size={18}
-                        className="fill-yellow-400 text-yellow-400"
+                        key={s}
+                        size={11}
+                        style={{
+                          fill: "var(--gold)",
+                          color: "var(--gold)",
+                        }}
                       />
-
-                      <span className="text-white text-sm">
-                        4.9
-                      </span>
-                    </div>
+                    ))}
                   </div>
                 </div>
-              </div>
 
-              {/* TRENDING */}
+                <p
+                  style={{
+                    color: "var(--muted)",
+                    fontSize: "0.8rem",
+                    lineHeight: 1.7,
+                    marginBottom: 14,
+                  }}
+                >
+                  Premium quality with rich authentic flavors crafted fresh
+                  daily.
+                </p>
 
-              <div className="absolute top-5 left-5 z-20 bg-yellow-400 text-black text-xs px-4 py-2 rounded-full font-bold shadow-lg">
-                Trending
-              </div>
+                {/* NORMAL PRICE FONT */}
 
-              {/* HEART */}
+                <div className="flex items-center justify-between mb-4">
+                  <span
+                    style={{
+                      fontSize: "1.5rem",
+                      fontWeight: 900,
+                      color: "var(--gold)",
+                    }}
+                  >
+                    ₹{item.price}
+                  </span>
 
-              <button className="absolute top-5 right-5 z-20 w-11 h-11 rounded-full bg-black/50 backdrop-blur-lg flex items-center justify-center border border-white/10">
-                <Heart
-                  size={20}
-                  className="text-white group-hover:text-red-500 duration-300"
-                />
-              </button>
-            </div>
+                  <span
+                    style={{
+                      fontSize: "0.72rem",
+                      color: "var(--muted)",
+                    }}
+                  >
+                    30 min delivery
+                  </span>
+                </div>
 
-            {/* CONTENT */}
+                <div style={{ display: "flex", gap: 10 }}>
+                  <button
+                    className="add-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addToCart();
+                    }}
+                  >
+                    <ShoppingCart size={15} />
+                    Add to Cart
+                  </button>
 
-            <div className="p-5 relative z-10">
-              {/* TITLE */}
-
-              <h3 className="text-2xl font-black">
-                {item.title}
-              </h3>
-
-              {/* DESCRIPTION */}
-
-              <p className="text-gray-400 leading-6 mt-3 text-sm">
-                Premium quality food with fresh ingredients
-                and rich flavor.
-              </p>
-
-              {/* PRICE */}
-
-              <div className="flex items-center justify-between mt-5">
-                <h2 className="text-3xl font-black text-yellow-400">
-                  ₹{item.price}
-                </h2>
-
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      size={15}
-                      className="fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
+                  <button
+                    className="outline-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addToCart();
+                    }}
+                  >
+                    Buy Now
+                  </button>
                 </div>
               </div>
-
-              {/* BUTTONS */}
-
-              <div className="flex flex-col gap-3 mt-5">
-                {/* ADD TO CART */}
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addToCart();
-                  }}
-                  className="w-full bg-yellow-400 text-black py-4 rounded-2xl font-bold hover:scale-[1.02] duration-300 flex items-center justify-center gap-3"
-                >
-                  <ShoppingCart size={18} />
-                  Add To Cart
-                </button>
-
-                {/* BUY NOW */}
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addToCart();
-                  }}
-                  className="w-full bg-white/10 border border-white/10 py-4 rounded-2xl font-bold hover:bg-yellow-400 hover:text-black duration-300"
-                >
-                  Buy Now
-                </button>
-              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </section>
 
-      {/* PRODUCT MODAL */}
+      {/* POPUP */}
 
       {selectedProduct && (
         <div
-          onClick={closeModal}
-          className={`fixed inset-0 z-50 flex items-center justify-center p-5 transition-all duration-300 ${
-            modalVisible
-              ? "bg-black/80 backdrop-blur-md"
-              : "bg-black/0"
-          }`}
+          className="popup-overlay fixed inset-0 z-50 flex items-center justify-center p-5"
+          style={{
+            background: "rgba(13,10,7,0.92)",
+            backdropFilter: "blur(10px)",
+          }}
+          onClick={() => setSelectedProduct(null)}
         >
           <div
+            className="popup-modal"
+            style={{
+              background: "#111009",
+              border: "1px solid var(--border)",
+              borderRadius: 28,
+              maxWidth: 500,
+              width: "100%",
+              overflow: "hidden",
+            }}
             onClick={(e) => e.stopPropagation()}
-            className={`relative bg-gray-950 border border-gray-800 rounded-[40px] max-w-lg w-full overflow-hidden transition-all duration-300 ${
-              modalVisible
-                ? "opacity-100 scale-100 translate-y-0"
-                : "opacity-0 scale-90 translate-y-10"
-            }`}
           >
-            {/* CLOSE */}
-
-            <button
-              onClick={closeModal}
-              className="absolute top-5 right-5 bg-yellow-400 text-black w-10 h-10 rounded-full flex items-center justify-center z-10 hover:scale-110 duration-300"
-            >
-              <X size={20} />
-            </button>
-
-            {/* IMAGE */}
-
-            <div className="overflow-hidden h-[320px]">
+            <div style={{ height: 320 }}>
               <img
                 src={selectedProduct.image}
                 alt={selectedProduct.title}
-                className="w-full h-full object-cover hover:scale-110 duration-700"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
               />
             </div>
 
-            {/* CONTENT */}
-
-            <div className="p-8">
-              <div className="flex gap-1 mb-3">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    size={18}
-                    className="fill-yellow-400 text-yellow-400"
-                  />
-                ))}
-
-                <span className="text-gray-400 text-sm ml-2 self-center">
-                  (4.9 / 5)
-                </span>
-              </div>
-
-              <h2 className="text-4xl font-black">
+            <div style={{ padding: 28 }}>
+              <h2
+                className="serif"
+                style={{
+                  fontSize: "1.9rem",
+                  fontWeight: 900,
+                  marginBottom: 12,
+                }}
+              >
                 {selectedProduct.title}
               </h2>
 
-              <p className="text-gray-400 leading-8 mt-5">
-                Premium quality delicious food prepared
-                with fresh ingredients and authentic taste.
+              <p
+                style={{
+                  color: "var(--muted)",
+                  lineHeight: 1.7,
+                  marginBottom: 20,
+                }}
+              >
+                Prepared fresh with premium ingredients for an unforgettable
+                taste experience.
               </p>
 
-              {/* PRICE */}
+              {/* NORMAL POPUP PRICE */}
 
-              <div className="flex items-center gap-3 mt-8">
-                <h3 className="text-5xl font-black text-yellow-400">
+              <div className="flex items-center gap-4 mb-6">
+                <span
+                  style={{
+                    fontSize: "2rem",
+                    fontWeight: 900,
+                    color: "var(--gold)",
+                  }}
+                >
                   ₹{selectedProduct.price}
-                </h3>
-
-                <span className="text-gray-500 line-through text-xl">
-                  ₹
-                  {Math.round(
-                    selectedProduct.price * 1.3
-                  )}
                 </span>
 
-                <span className="bg-green-500/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full">
-                  30% OFF
+                <span
+                  style={{
+                    color: "var(--muted)",
+                    textDecoration: "line-through",
+                  }}
+                >
+                  ₹{Math.round(selectedProduct.price * 1.3)}
                 </span>
               </div>
 
-              {/* BUTTONS */}
-
-              <div className="flex gap-4 mt-8">
+              <div style={{ display: "flex", gap: 12 }}>
                 <button
+                  className="add-btn"
                   onClick={() => {
                     addToCart();
-                    closeModal();
+                    setSelectedProduct(null);
                   }}
-                  className="flex-1 bg-yellow-400 text-black py-4 rounded-2xl font-bold hover:scale-105 duration-300"
                 >
-                  Add To Cart
+                  <ShoppingCart size={16} />
+                  Add to Cart
                 </button>
 
                 <button
+                  className="outline-btn"
                   onClick={() => {
                     addToCart();
-                    closeModal();
+                    setSelectedProduct(null);
                   }}
-                  className="flex-1 border border-yellow-400 py-4 rounded-2xl font-bold hover:bg-yellow-400 hover:text-black duration-300"
                 >
                   Buy Now
                 </button>
               </div>
             </div>
+
+            <button
+              onClick={() => setSelectedProduct(null)}
+              style={{
+                position: "absolute",
+                top: 20,
+                right: 20,
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                border: "none",
+                background: "rgba(0,0,0,0.5)",
+                color: "white",
+                cursor: "pointer",
+              }}
+            >
+              <X size={18} />
+            </button>
           </div>
         </div>
       )}
