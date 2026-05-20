@@ -1,4 +1,4 @@
-// src/components/Navbar.jsx
+// src/components/Navbar.jsx.+
 
 import { useState } from "react";
 import {
